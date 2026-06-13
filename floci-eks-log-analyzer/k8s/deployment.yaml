@@ -18,16 +18,8 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 8000
-          env:
-            - name: S3_BUCKET
-              value: SKM-Bucket
-            - name: S3_KEY
-              value: apache_logs
-            - name: S3_ENDPOINT_URL
-              value: http://host.docker.internal:4566
-            - name: AWS_ACCESS_KEY_ID
-              value: test
-            - name: AWS_SECRET_ACCESS_KEY
-              value: test
-            - name: AWS_DEFAULT_REGION
-              value: us-east-1
+          envFrom:
+            - configMapRef:
+                name: floci-log-analyzer-config
+            - secretRef:
+                name: floci-log-analyzer-secret

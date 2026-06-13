@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: floci-log-analyzer
-          image: host.docker.internal:5100/floci-eks-log-analyzer:v1
+          image: host.docker.internal:5100/floci-eks-log-analyzer:v2
           imagePullPolicy: Always
           ports:
             - containerPort: 8000

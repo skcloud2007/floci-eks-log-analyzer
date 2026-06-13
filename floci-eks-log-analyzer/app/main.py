@@ -3,7 +3,7 @@ import re
 from collections import Counter
 
 import boto3
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTTPException
 
 app = FastAPI(title="Floci EKS Log Analyzer")
 
@@ -50,6 +50,31 @@ def home():
         "bucket": S3_BUCKET,
         "key": S3_KEY,
     }
+
+@app.get("/health")
+def health():
+    return {
+        "status": "healthy",
+        "service": "floci-log-analyzer"
+    }
+
+
+@app.get("/ready")
+def ready():
+    try:
+        s3.head_object(Bucket=S3_BUCKET, Key=S3_KEY)
+
+        return {
+            "status": "ready",
+            "bucket": S3_BUCKET,
+            "key": S3_KEY
+        }
+
+    except Exception as error:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Service not ready. Unable to access S3 object: {error}"
+        )
 
 @app.get("/top-ips")
 def top_ips(limit: int = Query(default=10, ge=1, le=100)):

@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: log-analyzer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: log-analyzer
+  template:
+    metadata:
+      labels:
+        app: log-analyzer
+    spec:
+      containers:
+        - name: log-analyzer
+          image: python:3.11-slim
+          workingDir: /app
+          command:
+            - sh
+            - -c
+            - |
+              pip install --no-cache-dir fastapi uvicorn boto3
+              uvicorn app:app --host 0.0.0.0 --port 8000
+          ports:
+            - containerPort: 8000
+          env:
+            - name: S3_BUCKET
+              value: SKM-Bucket
+            - name: S3_KEY
+              value: apache_logs
+            - name: S3_ENDPOINT_URL
+              value: http://host.docker.internal:4566
+            - name: AWS_ACCESS_KEY_ID
+              value: test
+            - name: AWS_SECRET_ACCESS_KEY
+              value: test
+            - name: AWS_DEFAULT_REGION
+              value: us-east-1
+          volumeMounts:
+            - name: app-code
+              mountPath: /app/app.py
+              subPath: app.py
+      volumes:
+        - name: app-code
+          configMap:
+            name: log-analyzer-code
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: log-analyzer
+spec:
+  selector:
+    app: log-analyzer
+  ports:
+    - port: 8000
+      targetPort: 8000

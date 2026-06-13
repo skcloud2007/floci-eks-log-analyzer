@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: floci-log-analyzer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: floci-log-analyzer
+  template:
+    metadata:
+      labels:
+        app: floci-log-analyzer
+    spec:
+      containers:
+        - name: floci-log-analyzer
+          image: host.docker.internal:5100/floci-eks-log-analyzer:v1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+          env:
+            - name: S3_BUCKET
+              value: SKM-Bucket
+            - name: S3_KEY
+              value: apache_logs
+            - name: S3_ENDPOINT_URL
+              value: http://host.docker.internal:4566
+            - name: AWS_ACCESS_KEY_ID
+              value: test
+            - name: AWS_SECRET_ACCESS_KEY
+              value: test
+            - name: AWS_DEFAULT_REGION
+              value: us-east-1
